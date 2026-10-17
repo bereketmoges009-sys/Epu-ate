@@ -16,13 +16,13 @@ from telegram.ext import (
     filters,
 )
 
-# --- CONFIGURATION ---
-BOT_TOKEN = "8797122421:AAEgAW17o-7WvIgHiYe_lxplitnZ_MiSrs0"
+# --- CONFIGURATION (Railway Environment Variables) ---
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 COORDINATOR_ID = "7609626589"
 
-# Supabase Credentials
-SUPABASE_URL = "https://mkaxuadbmcqvosqckkz.supabase.co"
-SUPABASE_KEY = "sb_publishable_aOmVR8ryNBc8KnFFVv4d9Q_5UlolbVS"
+# Supabase Credentials from Environment Variables
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Google Sheets Credentials (ለ PDF ሪፖርት ማጠናቀሪያ)
@@ -52,7 +52,6 @@ try:
 
   if creds:
     client = gspread.authorize(creds)
-    # የ Google Sheet ስም በትክክል ተስተካክሏል
     main_sheet = client.open("Employee Attendance Tracker")
     sheet1 = main_sheet.sheet1
     try:
