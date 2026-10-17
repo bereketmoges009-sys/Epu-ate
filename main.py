@@ -52,12 +52,16 @@ try:
 
   if creds:
     client = gspread.authorize(creds)
-    main_sheet = client.open("Student_Attendance_DB")
+    # የ Google Sheet ስም በትክክል ተስተካክሏል
+    main_sheet = client.open("Employee Attendance Tracker")
     sheet1 = main_sheet.sheet1
-    summary_sheet = main_sheet.worksheet("Summary")
+    try:
+      summary_sheet = main_sheet.worksheet("Summary")
+    except:
+      summary_sheet = main_sheet.add_worksheet(title="Summary", rows="100", cols="10")
     print("Google Sheets successfully connected!")
 except Exception as e:
-  print(f"Google Sheets Connection Warning: {e}")
+  print(f"Google Sheets Connection Error: {e}")
 
 NAME, STUDENT_ID, LOCATION, REASON = range(4)
 START_KEYBOARD = ReplyKeyboardMarkup(
@@ -250,15 +254,18 @@ async def finalize_attendance(update, context, status):
   time_str = now.strftime("%I:%M %p")
 
   try:
-    supabase.table("attendance").insert({
+    res = supabase.table("attendance").insert({
         "telegram_id": user_id,
         "date": date_str,
         "check_in": time_str,
         "check_out": session,
         "status": status
     }).execute()
+    print("Supabase Insert Response:", res)
   except Exception as e:
     print(f"Supabase Attendance Insert Error: {e}")
+    await update.message.reply_text(f"⚠️ የዳታቤዝ ስህተት አጋጥሟል: {e}")
+    return ConversationHandler.END
 
   if sheet1:
     try:
@@ -280,7 +287,7 @@ async def finalize_attendance(update, context, status):
       print(f"Google Sheet Summary Error: {e}")
 
   await update.message.reply_text(
-      f"✅ ተመዝግቧል። ሰዓት፡ {time_str}",
+      f"✅ በተሳካ ሁኔታ ተመዝግቧል! ሰዓት፡ {time_str}",
       reply_markup=START_KEYBOARD,
   )
   return ConversationHandler.END
